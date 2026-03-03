@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Vinili.Pietro.com</title>
+  <link rel="shortcut icon" href="./immagini/Vinile.jpg" type="image/x-icon" />
+  
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+  <style>
+    .col { transition: transform 0.15s; cursor: grab; }
+    .col:active { cursor: grabbing; }
+    .card.status-ok { border-left: 6px solid #198754; background-color: rgba(25,135,84,.1); }
+    .card.status-work { border-left: 6px solid #ffc107; background-color: rgba(255,193,7,.1); }
+    .card.status-usa { border-left: 6px solid #dc3545; background-color: rgba(220,53,69,.1); }
+    .card.status-ita { border-left: 6px solid #dc3545; background-color: rgba(220,53,69,.1); }
+  </style>
+</head>
+<body class="bg-success-subtle min-vh-100 d-flex flex-column" data-bs-theme="dark">
+
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-md bg-danger">
+    <div class="container-fluid">
+      <a class="navbar-brand d-flex align-items-center" href="#">
+        <img src="./immagini/Vinile.jpg" alt="logo" style="width: 40px" class="me-2"/>
+        <span class="text-black">Vinili.Pietro.com</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- BACKUP -->
+  <div class="card shadow-sm mt-4">
+    <div class="card-body text-center">
+      <h5 class="mb-3">Backup collezione</h5>
+
+      <div class="d-flex justify-content-center gap-3 flex-wrap">
+        <button id="export-btn" class="btn btn-outline-primary">
+          🪖 Esporta backup (.json)
+        </button>
+
+        <label class="btn btn-outline-success mb-0">
+          📁 Importa backup (.json)
+          <input type="file" id="import-input" accept=".json" hidden>
+        </label>
+      </div>
+    </div>
+  </div>
+
+
+  <main class="flex-grow-1">
+    <div class="container py-4" style="max-width: 1800px">
+
+      <!-- TOTALI GLOBALI -->
+      <div class="row mb-4 text-center">
+        <div class="col-md-6">
+          <div class="p-3 bg-dark rounded shadow-sm">
+            <h5 class="text-white m-0">Totale Comprato</h5>
+            <h4 class="text-danger m-0" id="tot-comprato">0 €</h4>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="p-3 bg-dark rounded shadow-sm">
+            <h5 class="text-white m-0">Totale Valore</h5>
+            <h4 class="text-success m-0" id="tot-valore">0 €</h4>
+          </div>
+        </div>
+      </div>
+
+      <!-- FORM -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-body">
+          <h3 class="card-title mb-3">Aggiungi un vinile</h3>
+          <div id="alerts"></div>
+          <form id="vinyl-form" novalidate>
+            <div class="row g-3">
+              <!-- campi del form -->
+              <div class="col-md-4"><label for="album" class="form-label">Album *</label><input type="text" id="album" class="form-control" required /></div>
+              <div class="col-md-4"><label for="artist" class="form-label">Artista *</label><input type="text" id="artist" class="form-control" required /></div>
+              <div class="col-md-4"><label for="cover" class="form-label">Cover</label><input type="text" id="cover" class="form-control" /></div>
+              <div class="col-md-4"><label for="color" class="form-label">Colore</label><input type="text" id="color" class="form-control" /></div>
+              <div class="col-md-4"><label for="purchasePrice" class="form-label">Comprato</label><input type="number" id="purchasePrice" class="form-control" min="0" step="0.01"/></div>
+              <div class="col-md-4"><label for="currentValue" class="form-label">Valore (€)</label><input type="number" id="currentValue" class="form-control" min="0" step="0.01"/></div>
+              <div class="col-md-4"><label for="signedBefore" class="form-label">Firmato PRIMA</label>
+                <select id="signedBefore" class="form-select"><option value="">-</option><option>SI</option><option>NO</option></select>
+              </div>
+              <div class="col-md-4"><label for="signedAfter" class="form-label">Firmato DOPO</label>
+                <select id="signedAfter" class="form-select"><option value="">-</option><option>SI</option><option>NO</option></select>
+              </div>
+              <div class="col-md-4"><label for="numbered" class="form-label">Numerato</label><input type="text" id="numbered" class="form-control" /></div>
+              <div class="col-md-4"><label for="condition" class="form-label">Condizione</label>
+                <select id="condition" class="form-select"><option value="">-</option><option>M</option><option>NM</option><option>VG+</option><option>VG</option><option>G+</option><option>G</option><option>F</option><option>P</option></select>
+              </div>
+              <div class="col-md-4"><label for="ean" class="form-label">Codice Barre</label><input type="text" id="ean" class="form-control" /></div>
+              <div class="col-md-4"><label for="purchaseDate" class="form-label">Giorno d’acquisto</label><input type="text" id="purchaseDate" class="form-control" placeholder="GG/MM/AAAA"/></div>
+              <div class="col-md-4"><label for="imageUrl" class="form-label">URL immagine</label><input type="url" id="imageUrl" class="form-control" placeholder="https://…/cover.jpg"/></div>
+              <div class="col-md-4"><label for="priority" class="form-label">Priorità N.</label>
+                <select id="priority" class="form-select"><option value="">-</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select>
+              </div>
+              <div class="col-md-4">
+                <label for="status-select" class="form-label">Sezione</label>
+                <select id="status-select" class="form-select">
+                  <option value="ok">Collezione</option>
+                  <option value="work" selected>Incerti</option>
+                  <option value="usa">Obiettivi USA</option>
+                  <option value="ita">Obiettivi ITA</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-12">
+                <label for="store" class="form-label">Negozio</label>
+                <div id="store-checkboxes" class="d-flex flex-wrap gap-2">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="DISCOGS" id="store-Discogs">
+                    <label class="form-check-label" for="store-Discogs">Discogs</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="VINTED" id="store-Vinted">
+                    <label class="form-check-label" for="store-Vinted">Vinted</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="LAFELTRINELLI" id="store-LaFeltrinelli">
+                    <label class="form-check-label" for="store-LaFeltrinelli">LaFeltrinelli</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="UNIVERSAL MUSIC ITALIA" id="store-Universal">
+                    <label class="form-check-label" for="store-Universal">Universal Music Italia</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="AMAZON ITA" id="store-AmazonIta">
+                    <label class="form-check-label" for="store-AmazonIta">Amazon Ita</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="AMAZON USA" id="store-AmazonUsa">
+                    <label class="form-check-label" for="store-AmazonUsa">Amazon Usa</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="EBAY" id="store-Ebay">
+                    <label class="form-check-label" for="store-Ebay">Ebay</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="STORE SONY MUSIC ITALIA" id="store-Sony">
+                    <label class="form-check-label" for="store-Sony">Store Sony Music Italia</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="WARNER MUSIC ITALIA" id="store-Warner">
+                    <label class="form-check-label" for="store-Warner">Warner Music Italia</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="DISCOTECA LAZIALE" id="store-Discoteca Laziale">
+                    <label class="form-check-label" for="store-Discoteca Laziale">Discoteca Laziale</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="MONDADORI" id="store-Mondadori">
+                    <label class="form-check-label" for="store-Mondadori">Mondadori</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="SUBITO.IT" id="store-Subito">
+                    <label class="form-check-label" for="store-Subito">Subito.it</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="WALLAPOP" id="store-Wallapop">
+                    <label class="form-check-label" for="store-Wallapop">Wallapop</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="EXIT MUSIC" id="store-Exit">
+                    <label class="form-check-label" for="store-Exit">Exit Music</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="ALTRO" id="store-Altro">
+                    <label class="form-check-label" for="store-Altro">Altro</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="REGALO" id="store-Regalo">
+                    <label class="form-check-label" for="store-Regalo">Regalo</label>
+                  </div>
+                </div>
+                <input type="text" id="storeOther" class="form-control mt-2 d-none" placeholder="Scrivi il nome del negozio..." />
+              </div>
+            <div class="d-flex gap-2 mt-4">
+              <button class="btn btn-primary" type="submit"><i class="bi bi-check-lg me-1"></i>Invia</button>
+              <button class="btn btn-success" type="button" id="reset-btn"><i class="bi bi-arrow-counterclockwise me-1"></i>Reset</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- BARRA DI RICERCA GLOBALE -->
+      <div class="row mb-4">
+        <div class="col-12 col-lg-8 mx-auto">
+          <div class="input-group">
+            <span class="input-group-text">🔍</span>
+            <input id="globalSearchInput" type="search" class="form-control" placeholder="QUALE VINILE CERCHI OGGI?" />
+          </div>
+        </div>
+      </div>
+
+      <!-- SEZIONI VINILI -->
+      <div class="mb-4">
+        <div style="display: flex; justify-content: space-between;">
+          <h5>COLLEZIONE</h5>
+          <h5><span class="text-secondary small">Totale: <span id="count-ok">0</span></span></h5>
+          <!-- FILTRO ORDINAMENTO -->
+          <select id="sort-ok" class="form-select form-select-sm mb-2 w-auto">
+            <option value="">Ordina per</option>
+            <option value="purchasePrice">Pagato Poco</option>
+            <option value="-purchasePrice">Pagato Tanto</option>
+            <option value="currentValue">Valore - Grande</option>
+            <option value="-currentValue">Valore + Grande</option>
+            <option value="condition">Da M a P</option>
+            <option value="-condition">Da P A M</option>
+            <option value="purchaseDate">Vecchio</option>
+            <option value="-purchaseDate">Recente</option>
+            <option value="priority">Priorità Attuale</option>
+            <option value="-priority">Priorità Futura</option>
+            <option value="signed">Non Autografato</option>
+            <option value="-signed">Autografato</option>
+          </select>
+        </div>
+        <div id="row-ok" class="row row-cols-1 row-cols-md-2 row-cols-lg-5 g-3"></div>
+      </div>
+      <hr class="border-secondary">
+
+      <div class="mb-4">
+        <div style="display: flex; justify-content: space-between;">
+          <h5>INCERTI</h5>
+          <h5><span class="text-secondary small">Totale: <span id="count-work">0</span></span></h5>
+          <select id="sort-work" class="form-select form-select-sm mb-2 w-auto">
+            <option value="">Ordina per</option>
+            <option value="purchasePrice">Pagato Poco</option>
+            <option value="-purchasePrice">Pagato Tanto</option>
+            <option value="currentValue">Valore - Grande</option>
+            <option value="-currentValue">Valore + Grande</option>
+            <option value="condition">Da M A P</option>
+            <option value="-condition">Da P A M</option>
+            <option value="purchaseDate">Vecchio</option>
+            <option value="-purchaseDate">Recente</option>
+            <option value="priority">Priorità Attuale</option>
+            <option value="-priority">Priorità Futura</option>
+            <option value="signed">Non Autografato</option>
+            <option value="-signed">Autografato</option>
+          </select>
+        </div>
+        <div id="row-work" class="row row-cols-1 row-cols-md-2 row-cols-lg-5 g-3"></div>
+      </div>
+      <hr class="border-secondary">
+
+      <div class="mb-4">
+        <div style="display: flex; justify-content: space-between;">
+          <h5>OBIETTIVI USA</h5>
+          <h5><span class="text-secondary small">Totale: <span id="count-usa">0</span></span></h5>
+          <select id="sort-usa" class="form-select form-select-sm mb-2 w-auto">
+            <option value="">Ordina per...</option>
+            <option value="purchasePrice">Pagato Poco</option>
+            <option value="-purchasePrice">Pagato Tanto</option>
+            <option value="currentValue">Valore - Grande</option>
+            <option value="-currentValue">Valore + Grande</option>
+            <option value="condition">Da M A P</option>
+            <option value="-condition">Da P A M</option>
+            <option value="purchaseDate">Vecchio</option>
+            <option value="-purchaseDate">Recente</option>
+            <option value="priority">Priorità Attuale</option>
+            <option value="-priority">Priorità Futura</option>
+            <option value="signed">Non Autografato</option>
+            <option value="-signed">Autografato</option>
+          </select>
+        </div>
+        <div id="row-usa" class="row row-cols-1 row-cols-md-2 row-cols-lg-5 g-3"></div>
+      </div>
+      <hr class="border-secondary">
+      
+      <div class="mb-4">
+        <div style="display: flex; justify-content: space-between;">
+          <h5>OBIETTIVI ITA</h5>
+          <h5><span class="text-secondary small">Totale: <span id="count-ita">0</span></span></h5>
+          <select id="sort-ita" class="form-select form-select-sm mb-2 w-auto">
+            <option value="">Ordina per...</option>
+            <option value="purchasePrice">Pagato Poco</option>
+            <option value="-purchasePrice">Pagato Tanto</option>
+            <option value="currentValue">Valore - Grande</option>
+            <option value="-currentValue">Valore + Grande</option>
+            <option value="condition">Da M A P</option>
+            <option value="-condition">Da P A M</option>
+            <option value="purchaseDate">Vecchio</option>
+            <option value="-purchaseDate">Recente</option>
+            <option value="priority">Priorità Attuale</option>
+            <option value="-priority">Priorità Futura</option>
+            <option value="signed">Non Autografato</option>
+            <option value="-signed">Autografato</option>
+          </select>
+        </div>
+        <div id="row-ita" class="row row-cols-1 row-cols-md-2 row-cols-lg-5 g-3"></div>
+      </div>
+
+
+      <!-- EMPTY STATE -->
+      <div id="empty-state" class="alert alert-info d-none" role="alert">
+        Nessun vinile presente. Usa il form qui sopra per aggiungerne uno.
+      </div>
+
+    </div>
+  </main>
+
+
+  <footer class="mt-auto">
+    <div class="container">
+      <p class="text-center m-0 py-3">Vinil Store - <span id="year"></span></p>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="./homepage.js"></script>
+</body>
+</html>
