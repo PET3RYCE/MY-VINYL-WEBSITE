@@ -3,7 +3,6 @@ const KEY = "vinyls";
 const DEF_IMG = "./immagini/Vinile.jpg";
 let editingId = null;
 
-
 // Backup predefinito incorporato
 const DEFAULT_BACKUP = [
   {
